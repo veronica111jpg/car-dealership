@@ -38,3 +38,7 @@ class VehicleOut(VehicleCreate):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+
+class RestockRequest(BaseModel):
+    """How many units to add. Must be at least 1."""
+    quantity: int = Field(gt=0)
