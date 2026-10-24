@@ -24,3 +24,17 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class VehicleCreate(BaseModel):
+    """Fields needed to add a vehicle. Price and quantity can't be negative."""
+    make: str = Field(min_length=1)
+    model: str = Field(min_length=1)
+    category: str = Field(min_length=1)
+    price: float = Field(ge=0)
+    quantity: int = Field(ge=0)
+
+
+class VehicleOut(VehicleCreate):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
