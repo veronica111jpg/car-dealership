@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import CarIcon from "../components/CarIcon";
 
 export default function AuthPage({ mode }) {
   const isLogin = mode === "login";
@@ -37,8 +38,10 @@ export default function AuthPage({ mode }) {
         className="w-full max-w-md space-y-5 rounded-2xl bg-white p-8 shadow-2xl"
       >
         <div className="text-center">
-          <div className="text-4xl">🚗</div>
-          <h1 className="mt-2 text-2xl font-bold text-slate-800">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white">
+            <CarIcon className="h-8 w-8" />
+          </div>
+          <h1 className="mt-3 text-2xl font-bold text-slate-800">
             {isLogin ? "Welcome back" : "Create your account"}
           </h1>
           <p className="text-sm text-slate-500">Car Dealership Inventory</p>
