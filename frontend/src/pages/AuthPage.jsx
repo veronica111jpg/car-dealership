@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-import CarIcon from "../components/CarIcon";
+import CarSilhouette from "../components/CarSilhouette";
 
 export default function AuthPage({ mode }) {
   const isLogin = mode === "login";
@@ -28,67 +28,78 @@ export default function AuthPage({ mode }) {
     }
   }
 
-  const inputClass =
-    "w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200";
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md space-y-5 rounded-2xl bg-white p-8 shadow-2xl"
-      >
-        <div className="text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white">
-            <CarIcon className="h-8 w-8" />
-          </div>
-          <h1 className="mt-3 text-2xl font-bold text-slate-800">
-            {isLogin ? "Welcome back" : "Create your account"}
-          </h1>
-          <p className="text-sm text-slate-500">Car Dealership Inventory</p>
-        </div>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Soft light behind the drawing, the only "decoration" on the page. */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_75%_45%,rgba(255,255,255,0.09),transparent_60%)]" />
 
-        {error && (
-          <div className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={inputClass}
-        />
-        <input
-          type="password"
-          required
-          minLength={6}
-          placeholder="Password (min 6 characters)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className={inputClass}
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-lg bg-indigo-600 py-2.5 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
-        >
-          {loading ? "Please wait..." : isLogin ? "Log in" : "Sign up"}
-        </button>
-
-        <p className="text-center text-sm text-slate-500">
-          {isLogin ? "New here? " : "Already have an account? "}
+      <header className="relative border-b border-line">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <span className="text-sm font-semibold tracking-[0.25em]">AUTOSTOCK</span>
           <Link
             to={isLogin ? "/register" : "/login"}
-            className="font-medium text-indigo-600 hover:underline"
+            className="text-sm font-medium hover:text-muted"
           >
-            {isLogin ? "Create an account" : "Log in"}
+            {isLogin ? "Create account" : "Log in"}
           </Link>
-        </p>
-      </form>
+        </div>
+      </header>
+
+      <main className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 py-14 lg:min-h-[calc(100vh-70px)] lg:grid-cols-2">
+        <div>
+          <h1 className="text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+            Find your
+            <br />
+            next car.
+          </h1>
+          <p className="mt-4 max-w-sm text-muted">
+            Browse the full dealership inventory, filter by what matters and
+            buy in a click.
+          </p>
+
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 max-w-md space-y-4 rounded-lg border border-line bg-surface/60 p-6"
+          >
+            <h2 className="text-lg font-semibold">
+              {isLogin ? "Log in" : "Create your account"}
+            </h2>
+
+            {error && <div className="error-box">{error}</div>}
+
+            <div>
+              <label className="label">Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="field !bg-canvas"
+              />
+            </div>
+            <div>
+              <label className="label">Password</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                placeholder="At least 6 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="field !bg-canvas"
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="btn-primary w-full">
+              {loading ? "Please wait..." : isLogin ? "Log in" : "Sign up"}
+            </button>
+          </form>
+        </div>
+
+        <div className="hidden lg:block">
+          <CarSilhouette className="w-full text-ink/25" />
+        </div>
+      </main>
     </div>
   );
 }

@@ -2,9 +2,10 @@
 platform win32 -- Python 3.14.2, pytest-9.1.1, pluggy-1.7.0
 rootdir: C:\Users\Veronica Satsangi\car-dealership\backend
 plugins: anyio-4.15.1, cov-7.1.0
-collected 25 items
+collected 29 items
 
-tests\test_auth.py ......                                                [ 24%]
+tests\test_auth.py ......                                                [ 20%]
+tests\test_edge_cases.py ....                                            [ 34%]
 tests\test_vehicles.py ...................                               [100%]
 
 ============================== warnings summary ===============================
@@ -21,22 +22,22 @@ Name                                     Stmts   Miss  Cover   Missing
 app\__init__.py                              0      0   100%
 app\config.py                                4      0   100%
 app\database.py                             11      4    64%   17-21
-app\dependencies.py                         23      2    91%   26, 29
-app\main.py                                  8      0   100%
+app\dependencies.py                         23      0   100%
+app\main.py                                 10      0   100%
 app\models\__init__.py                       0      0   100%
 app\models\user.py                           8      0   100%
 app\models\vehicle.py                       10      0   100%
 app\repositories\__init__.py                 0      0   100%
 app\repositories\user_repository.py         15      0   100%
-app\repositories\vehicle_repository.py      35      1    97%   41
+app\repositories\vehicle_repository.py      35      0   100%
 app\routers\__init__.py                      0      0   100%
 app\routers\auth.py                         22      0   100%
-app\routers\vehicles.py                     48      2    96%   85-86
+app\routers\vehicles.py                     48      0   100%
 app\schemas.py                              18      0   100%
-app\security.py                             19      2    89%   33-34
+app\security.py                             19      0   100%
 app\services\__init__.py                     0      0   100%
 app\services\auth_service.py                19      0   100%
 app\services\vehicle_service.py             36      0   100%
 ----------------------------------------------------------------------
-TOTAL                                      276     11    96%
-======================== 25 passed, 1 warning in 6.63s ========================
+TOTAL                                      278      4    99%
+======================== 29 passed, 1 warning in 5.96s ========================

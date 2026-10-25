@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { useAuth } from "../AuthContext";
 import AdminControls from "../components/AdminControls";
@@ -14,6 +14,8 @@ const EMPTY_FILTERS = { make: "", model: "", category: "", minPrice: "", maxPric
 export default function Dashboard() {
   const { session, isAdmin, logout } = useAuth();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [sort, setSort] = useState("relevance");
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -64,6 +66,19 @@ export default function Dashboard() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, refreshKey, session.token]);
+
+  // Stock toggle and sorting happen in the browser on the already-loaded list.
+  const visible = useMemo(() => {
+    let list = inStockOnly ? vehicles.filter((v) => v.quantity > 0) : vehicles;
+    if (sort === "price-asc") list = [...list].sort((a, b) => a.price - b.price);
+    if (sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
+    return list;
+  }, [vehicles, inStockOnly, sort]);
+
+  function clearFilters() {
+    setFilters(EMPTY_FILTERS);
+    setInStockOnly(false);
+  }
 
   async function handlePurchase(vehicle) {
     setBusyId(vehicle.id);
@@ -121,62 +136,80 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <Navbar />
 
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-7xl px-6 py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Available vehicles</h1>
-            <p className="text-slate-500">Browse the inventory and buy in one click.</p>
+            <h1 className="text-5xl font-semibold tracking-tight">Inventory</h1>
+            <p className="mt-2 text-sm text-muted">
+              {loading ? "Loading..." : `${visible.length} vehicles`}
+            </p>
           </div>
-          {isAdmin && (
-            <button
-              onClick={() => setModal({ type: "form", vehicle: null })}
-              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+          <div className="flex items-center gap-5">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              aria-label="Sort vehicles"
+              className="cursor-pointer bg-transparent text-sm font-semibold outline-none"
             >
-              + Add vehicle
-            </button>
-          )}
+              <option value="relevance">Relevance</option>
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
+            </select>
+            {isAdmin && (
+              <button
+                onClick={() => setModal({ type: "form", vehicle: null })}
+                className="btn-primary"
+              >
+                + Add vehicle
+              </button>
+            )}
+          </div>
         </div>
 
-        <FilterBar
-          filters={filters}
-          onChange={setFilters}
-          onClear={() => setFilters(EMPTY_FILTERS)}
-        />
+        <div className="mt-8 grid gap-10 lg:grid-cols-[17rem_1fr]">
+          <FilterBar
+            filters={filters}
+            onChange={setFilters}
+            inStockOnly={inStockOnly}
+            onInStockChange={setInStockOnly}
+            onClear={clearFilters}
+          />
 
-        {error && (
-          <div className="rounded-lg bg-red-50 px-4 py-3 text-red-700">{error}</div>
-        )}
+          <section>
+            {error && <div className="error-box mb-4">{error}</div>}
 
-        {loading ? (
-          <p className="py-12 text-center text-slate-500">Loading vehicles...</p>
-        ) : vehicles.length === 0 ? (
-          <p className="py-12 text-center text-slate-500">
-            No vehicles match your search.
-          </p>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {vehicles.map((v) => (
-              <VehicleCard
-                key={v.id}
-                vehicle={v}
-                onPurchase={handlePurchase}
-                busy={busyId === v.id}
-              >
-                {/* Only admins ever see these buttons (the server enforces it too). */}
-                {isAdmin && (
-                  <AdminControls
-                    onEdit={() => setModal({ type: "form", vehicle: v })}
-                    onRestock={() => setModal({ type: "restock", vehicle: v })}
-                    onDelete={() => setModal({ type: "delete", vehicle: v })}
-                  />
-                )}
-              </VehicleCard>
-            ))}
-          </div>
-        )}
+            {loading ? (
+              <p className="py-12 text-center text-muted">Loading vehicles...</p>
+            ) : visible.length === 0 ? (
+              <p className="py-12 text-center text-muted">
+                No vehicles match your search.
+              </p>
+            ) : (
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {visible.map((v) => (
+                  <VehicleCard
+                    key={v.id}
+                    vehicle={v}
+                    onPurchase={handlePurchase}
+                    busy={busyId === v.id}
+                  >
+                    {/* Only admins ever see these (the server enforces it too). */}
+                    {isAdmin && (
+                      <AdminControls
+                        onEdit={() => setModal({ type: "form", vehicle: v })}
+                        onRestock={() => setModal({ type: "restock", vehicle: v })}
+                        onDelete={() => setModal({ type: "delete", vehicle: v })}
+                      />
+                    )}
+                  </VehicleCard>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </main>
 
       {modal?.type === "form" && (
@@ -203,8 +236,8 @@ export default function Dashboard() {
 
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-30 rounded-lg px-4 py-3 font-medium text-white shadow-lg ${
-            toast.type === "error" ? "bg-red-600" : "bg-emerald-600"
+          className={`fixed bottom-6 right-6 z-30 rounded-md px-4 py-3 text-sm font-medium ${
+            toast.type === "error" ? "bg-danger text-white" : "bg-ink text-canvas"
           }`}
         >
           {toast.message}
